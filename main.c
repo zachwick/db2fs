@@ -43,13 +43,14 @@ along with this program; if not, you can download a copy at\n\
 https://www.gnu.org/licenses/gpl-3.0.txt\n";
 const char *arpg_program_bug_address = "<zach@zachwick.com>";
 static char doc[] = "Use your mysql db like a file system.";
-static char args_doc[] = "db2fs -h [HOST] -u [USER] -k [PASSWORD] -d [DBNAME] -m [MOUNTPOINT]";
+static char args_doc[] = "db2fs -h [HOST] -u [USER] -p [PASSWORD] -d [DBNAME] -m [MOUNTPOINT]";
+
 static struct argp_option options[] = {
-	{"host", "h", 0, 0, "MySQL host"},
-	{"user", "u", 0, 0, "MySQL username"},
-	{"password", "p", 0, 0, "MySQL password"},
-	{"dbname", "d", 0, 0, "database name"},
-	{"mount", "m", 0, 0, "mountpoint"},
+	{"host",     'h', "HOST",   0, "MySQL host"},
+	{"user",     'u', "USER",   0, "MySQL username"},
+	{"password", 'p', "PASSWD", 0, "MySQL password"},
+	{"dbname",   'd', "DBNAME", 0, "database name"},
+	{"mount",    'm', "MOUNT",  0, "mountpoint"},
 	{ 0 }
 };
 
@@ -63,9 +64,11 @@ struct arguments
 	char *mount;
 };
 
-static error_t parse_opt(int key, char* arg, struct argp_state *state)
+static error_t
+parse_opt(int key, char* arg, struct argp_state *state)
 {
 	struct arguments *arguments = state->input;
+	
 	switch (key) {
 	case 'h':
 		arguments->host = arg;
@@ -85,18 +88,22 @@ static error_t parse_opt(int key, char* arg, struct argp_state *state)
 	case ARGP_KEY_ARG:
 		if (state->arg_num >= 6)
 			{
+				printf("Too many arguments used\n");
 				// Too many arguments used
 				argp_usage(state);
 			}
 		arguments->args[state->arg_num] = arg;
 		break;
+		/*
 	case ARGP_KEY_END:
 		if (state->arg_num < 5)
 			{
+				printf("Too few arguments used: %d of 5\n",state->arg_num);
 				// Too few arguments used
 				argp_usage(state);
 			}
 		break;
+		*/
 	default:
 		return ARGP_ERR_UNKNOWN;
 	}
@@ -106,15 +113,15 @@ static error_t parse_opt(int key, char* arg, struct argp_state *state)
 static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
 int
-main(int argc, char *argv[])
+main(int argc, char **argv)
 {
-	// CLI Argument parsing
+	// CLI Argument parsing default values
 	struct arguments arguments;
 	arguments.host   = "localhost";
-	arguments.user   = "";
-	arguments.passwd = "";
-	arguments.dbname = "";
-	arguments.mount  = "";
+	arguments.user   = "user";
+	arguments.passwd = "passwd";
+	arguments.dbname = "dbname";
+	arguments.mount  = "mount";
 
 	argp_parse(&argp, argc, argv, 0, 0, &arguments);
 	
@@ -133,7 +140,8 @@ main(int argc, char *argv[])
 	
 	// Log into mysql server
 	// mysql_real_connect( MYSQL mysql, char* host, char* user, char* db, , ,)
-	if (!mysql_real_connect(&mysql, "localhost","bareo","","bareo",0,NULL,0))
+	if (!mysql_real_connect(&mysql, arguments.host, arguments.user,
+	                        arguments.passwd, arguments.dbname, 0, NULL, 0))
 		{
 			printf("\nFailed to connect to the MySQL server: Error: %s\n",mysql_error(&mysql));
 			exit(1);
