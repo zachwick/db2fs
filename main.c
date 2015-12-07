@@ -22,11 +22,14 @@
  *
  **/
 
+#include <fuse.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <argp.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <mysql/mysql.h>
 
 const char *argp_program_version = "\ndb2fs 0.0.1 Copyright 2015 zachwick\n\n\
