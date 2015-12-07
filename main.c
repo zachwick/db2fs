@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <argp.h>
 #include <mysql/mysql.h>
 
@@ -113,6 +114,12 @@ parse_opt(int key, char* arg, struct argp_state *state)
 static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
 int
+mysql_sql_exec(MYSQL *mysql, const char *query)
+{
+	return mysql_real_query(mysql, query, strlen(query));
+}
+
+int
 main(int argc, char **argv)
 {
 	// CLI Argument parsing default values
@@ -126,16 +133,17 @@ main(int argc, char **argv)
 	argp_parse(&argp, argc, argv, 0, 0, &arguments);
 	
 	MYSQL mysql;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
+	unsigned int num_fields;
+	unsigned int i;
+	
 	// Initialize the connection
 	if (mysql_init(&mysql) == NULL)
 		{
 			printf("\nFailed to initialize MySQL connection");
 			exit(1);
-		}
-	else
-		{
-			printf("\nInitialized MySQL connection");	
 		}
 	
 	// Log into mysql server
@@ -146,11 +154,22 @@ main(int argc, char **argv)
 			printf("\nFailed to connect to the MySQL server: Error: %s\n",mysql_error(&mysql));
 			exit(1);
 		}
-	else
+
+	// List DB Tables
+	result = mysql_list_tables(&mysql, NULL);
+	if (result)
 		{
-			printf("\nLogged into the MySQL server successfully");
+			num_fields = mysql_num_fields(result);
+			while ((row = mysql_fetch_row(result)))
+				{
+					for (i = 0; i < num_fields; i++)
+						{
+							printf("%s\n",row[i]);
+						}
+				}
+			mysql_free_result(result);
 		}
-	
+
 	// Close the connection to MySQL
 	mysql_close(&mysql);
 }

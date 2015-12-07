@@ -4,3 +4,13 @@ db2fs uses fuse to expose a db as a local filesystem
 
 Copyright 2015 zach wick <zach@zachwick.com>
 Licensed under the GNU GPLv3 or later
+
+
+.--------------------------------.
+|      MySQL     |      db2fs    |
+|----------------|---------------|
+|        db      |       dir     |
+|      table     |       dir     |
+|     record     |      file     |
+|   record data  | file contents |
+'--------------------------------'
