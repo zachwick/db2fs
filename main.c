@@ -16,10 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *
- * Compile with (or with GNU Make):
- * gcc main.c -o db2fs -I/usr/local/include -L/usr/local/lib/mysql -lmysqlclient
- *
  **/
 
 #define FUSE_USE_VERSION 26
