@@ -51,8 +51,7 @@ static struct argp_option options[] = {
 	{"host",     'h', "HOST",   0, "MySQL host"},
 	{"user",     'u', "USER",   0, "MySQL username"},
 	{"password", 'p', "PASSWD", 0, "MySQL password"},
-	{"dbname",   'd', "DBNAME", 0, "database name"},
-	{"mount",    'm', "MOUNT",  0, "mountpoint"},
+	{"dbname",   'b', "DBNAME", 0, "database name"},
 	{ 0 }
 };
 
@@ -63,7 +62,6 @@ struct arguments
 	char *user;
 	char *passwd;
 	char *dbname;
-	char *mount;
 };
 
 static error_t
@@ -81,11 +79,8 @@ parse_opt(int key, char* arg, struct argp_state *state)
 	case 'p':
 		arguments->passwd = arg;
 		break;
-	case 'd':
+	case 'b':
 		arguments->dbname = arg;
-		break;
-	case 'm':
-		arguments->mount = arg;
 		break;
 	case ARGP_KEY_ARG:
 		if (state->arg_num >= 6)
@@ -164,8 +159,10 @@ main(int argc, char **argv)
 	arguments.user   = "user";
 	arguments.passwd = "passwd";
 	arguments.dbname = "dbname";
-	arguments.mount  = "mount";
 
+	int fuse_argc = 2;
+	char *fuse_argv[] = { argv[0], argv[1] };
+	
 	argp_parse(&argp, argc, argv, 0, 0, &arguments);
 	
 	MYSQL mysql;
@@ -209,5 +206,6 @@ main(int argc, char **argv)
 	// Close the connection to MySQL
 	mysql_close(&mysql);
 
-	return fuse_main(argc, argv, &db2fs_oper, NULL);
+	//return fuse_main(argc - 2, argv + 2, &db2fs_oper, NULL);
+	return fuse_main(fuse_argc, fuse_argv, &db2fs_oper, NULL);
 }
