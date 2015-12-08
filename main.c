@@ -22,6 +22,8 @@
  *
  **/
 
+#define FUSE_USE_VERSION 26
+
 #include <fuse.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,6 +118,41 @@ parse_opt(int key, char* arg, struct argp_state *state)
 
 static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
+static int
+db2fs_getattr(const char *path, struct stat *stbuf)
+{
+	int res = 0;
+
+	return res;
+}
+
+static int
+db2fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+              off_t offset, struct fuse_file_info *fi)
+{
+	return 0;
+}
+
+static int
+db2fs_open(const char *path, struct fuse_file_info *fi)
+{
+	return 0;
+}
+
+static int
+db2fs_read(const char *path, char *buf, size_t size, off_t offset,
+           struct fuse_file_info *fi)
+{
+	return 0;
+}
+
+static struct fuse_operations db2fs_oper = {
+	.getattr	= db2fs_getattr,
+	.readdir	= db2fs_readdir,
+	.open		= db2fs_open,
+	.read		= db2fs_read,
+};
+	
 int
 mysql_sql_exec(MYSQL *mysql, const char *query)
 {
@@ -175,4 +212,6 @@ main(int argc, char **argv)
 
 	// Close the connection to MySQL
 	mysql_close(&mysql);
+
+	return fuse_main(argc, argv, &db2fs_oper, NULL);
 }
